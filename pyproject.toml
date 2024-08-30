@@ -13,7 +13,7 @@
   ]
   classifiers = [
     "Intended Audience :: End Users/Desktop",
-    "Intended Audience :: Telecommunications",
+    "Intended Audience :: Telecommunications Industry",
     "License :: OSI Approved :: BSD License",
     "Operating System :: MacOS",
     "Operating System :: POSIX :: Linux",
