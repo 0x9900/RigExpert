@@ -34,9 +34,10 @@ LINE_COLOR = "yellow"
 SWR_COLOR = "cyan"
 LIGHTGRAY = "#ababab"
 DARKBLUE = "#1d1330"
+EDGECOLOR = "#4b4b4b"
 
 MY_PARAMS = {
-  'axes.edgecolor': '#4b4b4b',
+  'axes.edgecolor': EDGECOLOR,
   'axes.facecolor': DARKBLUE,
   'axes.grid': True,
   'axes.grid.which': 'both',
@@ -126,10 +127,13 @@ def smith_chart(dut: rf.Network, ax: Axes) -> None:
                    label="Complex Impedance", draw_labels=True)
   for circle in ax.findobj(match=plt.Circle):
     if circle.get_edgecolor() != (0.0, 0.0, 0.0, 1.0):  # type: ignore
+      circle.set_edgecolor(LIGHTGRAY)                   # type: ignore
+      circle.set_linewidth(1)                           # type: ignore
+      circle.set_alpha(.25)
       circle.set_linestyle('dotted')                    # type: ignore
-      circle.set_edgecolor("#444444")                   # type: ignore
     else:
-      circle.set_edgecolor("#999999")                   # type: ignore
+      circle.set_linewidth(1.75)                        # type: ignore
+      circle.set_edgecolor(EDGECOLOR)                   # type: ignore
 
 
 def vswr_plot(dut: rf.Network, ax: Axes) -> None:
