@@ -147,7 +147,7 @@ def vswr_plot(dut: rf.Network, ax: Axes) -> None:
   ax.set_ylabel(r'$\rho$')
 
   max_vswr = (1+dut.s_mag.max())/(1-dut.s_mag.max())
-  ax.set_ylim(1, 4 if max_vswr < 4 else max_vswr * 1.2 if max_vswr < 20 else 20)
+  ax.set_ylim(1, 3 if max_vswr < 3 else max_vswr * 1.2 if max_vswr < 10 else 10)
   ax.axhline(y=2, linewidth=1, zorder=9, color=SWR_COLOR, linestyle="-.")
   ax.axhline(y=3, linewidth=1, zorder=9, color=SWR_COLOR, linestyle="-.")
 
@@ -295,6 +295,7 @@ def parse_args() -> argparse.Namespace:
     epilog='This program can be found https://gist.github.com/0x9900',
     formatter_class=argparse.RawDescriptionHelpFormatter)
   parser.add_argument('-f', '--s1p-file', type=pathlib.Path, required=True)
+  parser.add_argument('--verbose', action="store_true", default=False)
   parser.add_argument('-e', '--ext', default='.png',
                       choices=[".png", ".jpg", ".svg", ".svgz", ".pdf", ".webp"])
   parser.add_argument('-t', '--title')
@@ -330,6 +331,14 @@ def main() -> None:
     dut = read_s1p(opts.s1p_file, opts.range)
   except (NotImplementedError, FileNotFoundError, ValueError) as err:
     raise SystemExit(err) from None
+
+  try:
+    if opts.verbose:
+      logging.info('Start frequency: %s- End frequency: %s',
+                   fmt_freq(dut.frequency.f.min()),
+                   fmt_freq(dut.frequency.f.max()))
+  except ValueError:
+    raise SystemExit(f'{":".join(fmt_freq(f) for f in opts.range)} Out of Range')
 
   if opts.all:
     draw_all(dut, opts)
