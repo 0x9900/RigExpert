@@ -12,5 +12,5 @@ These charts include impedance plots, VSWR (Voltage Standing Wave Ratio) graphs,
 08/30/24 08:13:40 - 242 INFO - /tmp/mike-s-delta-loop-20-all.png
 08/30/24 08:13:40 - 225 INFO - /tmp/mike-s-delta-loop-20-dual.png
 ```
-<img src="example/mike-s-delta-loop-20-all.png" width="940">
-<img src="example/mike-s-delta-loop-20-dual.png" width="940">
+<img src="examples/mike-s-delta-loop-20-all.png" width="940">
+<img src="examples/mike-s-delta-loop-20-dual.png" width="940">
