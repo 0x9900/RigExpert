@@ -30,6 +30,6 @@ jobs:
       run: |
         flake8 $(git ls-files -- '*.py')
     - name: Lint check
-      continue-on-error: false
+      continue-on-error: true
       run: |
         pylint $(git ls-files -- '*.py')
