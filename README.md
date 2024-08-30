@@ -1,6 +1,6 @@
 # RigExpert
 
-RigExpert is a powerful tool designed to analyze and visualize antenna performance. It takes measurement data from devices like the RigExpert antenna analyzer or NanoVNA and generates detailed charts that help users understand their antenna's behavior.
+RigExpert is a tool designed to analyze and visualize antenna performance. It takes measurement data from devices like the RigExpert antenna analyzer or NanoVNA and generates detailed charts that help users understand their antenna's behavior.
 
 These charts include impedance plots, VSWR (Voltage Standing Wave Ratio) graphs, and Smith charts, which are essential for fine-tuning and optimizing antenna systems.
 
