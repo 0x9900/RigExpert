@@ -14,6 +14,8 @@ Example:
 08/27/24 14:31:15 - 203 INFO - /tmp/6-10m-antenna-all.png
 """
 
+from __future__ import annotations
+
 import argparse
 import logging
 import pathlib
@@ -104,9 +106,9 @@ def read_s1p(filename: pathlib.Path, f_range: List[float] | None) -> rf.Network:
   try:
     network = rf.Network(filename)
   except NotImplementedError:
-    raise NotImplementedError('Choose the Touchstone [S,RI] format when exporting your data')
+    raise NotImplementedError('The Touchstone format should be [S,RI]') from None
   except ValueError:
-    raise ValueError(f'{filename} does not look like a valid Touchstone file.')
+    raise ValueError(f'{filename} does not look like a valid Touchstone file.') from None
 
   # Often the RigExpert export a wrong last value (Remove the last value)
   network = network[0:-1]
@@ -327,7 +329,7 @@ def main() -> None:
   try:
     dut = read_s1p(opts.s1p_file, opts.range)
   except (NotImplementedError, FileNotFoundError, ValueError) as err:
-    raise SystemExit(err)
+    raise SystemExit(err) from None
 
   if opts.all:
     draw_all(dut, opts)
