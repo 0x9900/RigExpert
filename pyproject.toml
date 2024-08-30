@@ -6,7 +6,7 @@
   name = "RigExpert"
   readme = "README.md"
   description = "Draw Smith charts, VSWR graphs and more from RigExpert or NanoVNA .s1p files."
-  license = {file = "LICENSE.md"}
+  license = {file = "LICENSE"}
   dynamic = ["version"]
   authors = [
     { name = "Fred C." },
