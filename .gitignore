@@ -8,6 +8,7 @@ __pycache__/
 dxcluster.yaml
 alter_schema.sql
 upload.sh
+_version.py
 
 # C extensions
 *.so
