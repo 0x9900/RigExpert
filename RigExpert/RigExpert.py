@@ -147,7 +147,7 @@ def vswr_plot(dut: rf.Network, ax: Axes) -> None:
   ax.set_ylabel(r'$\rho$')
 
   max_vswr = (1+dut.s_mag.max())/(1-dut.s_mag.max())
-  ax.set_ylim(1, 3 if max_vswr < 3 else max_vswr * 1.2 if max_vswr < 10 else 10)
+  ax.set_ylim(1, 3 if max_vswr < 3 else max_vswr * 1.2 if max_vswr < 15 else 15)
   ax.axhline(y=2, linewidth=1, zorder=9, color=SWR_COLOR, linestyle="-.")
   ax.axhline(y=3, linewidth=1, zorder=9, color=SWR_COLOR, linestyle="-.")
 
@@ -338,6 +338,7 @@ def main() -> None:
                    fmt_freq(dut.frequency.f.min()),
                    fmt_freq(dut.frequency.f.max()))
   except ValueError:
+    # pylint: disable=raise-missing-from
     raise SystemExit(f'{":".join(fmt_freq(f) for f in opts.range)} Out of Range')
 
   if opts.all:
