@@ -29,7 +29,7 @@ from matplotlib.axes import Axes
 from matplotlib.gridspec import GridSpec
 from scipy import signal  # type: ignore[import-untyped]
 
-__author__ = 'Fred W6BSD - https://gist.github.com/0x9900/'
+__author__ = 'Fred W6BSD - https://github.com/0x9900/RigExpert/'
 
 DPI = 100
 LINE_COLOR = "yellow"
