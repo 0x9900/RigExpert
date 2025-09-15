@@ -60,7 +60,7 @@ MY_PARAMS = {
   'grid.linestyle': 'dashed',
   'grid.linewidth': 0.25,
   'legend.fontsize': 8,
-  'lines.linewidth': 1.5,
+  'lines.linewidth': 1,
   'lines.markersize': 5,
   'text.color': 'white',
   'xtick.color': LIGHTGRAY,
@@ -148,8 +148,8 @@ def vswr_plot(dut: rf.Network, ax: Axes) -> None:
 
   max_vswr = (1+dut.s_mag.max())/(1-dut.s_mag.max())
   ax.set_ylim(1, 3 if max_vswr < 3 else max_vswr * 1.2 if max_vswr < 15 else 15)
-  ax.axhline(y=2, linewidth=1, zorder=9, color=SWR_COLOR, linestyle="-.")
-  ax.axhline(y=3, linewidth=1, zorder=9, color=SWR_COLOR, linestyle="-.")
+  ax.axhline(y=2, linewidth=.75, zorder=9, color=SWR_COLOR, linestyle="-.")
+  ax.axhline(y=3, linewidth=.75, zorder=9, color=SWR_COLOR, linestyle="-.")
 
   for low, high, _l in BANDS:
     ax.axvspan(low*1000, high*1000, facecolor='cyan', alpha=0.15)
@@ -165,14 +165,13 @@ def vswr_plot(dut: rf.Network, ax: Axes) -> None:
   for idx in peaks:
     text.append(f'{fmt_freq(freq[idx])} VSWR: {vswr[idx]:.2f}')
     ax.annotate(f'{vswr[idx]:.2f}', xy=(freq[idx], vswr[idx]),
-                xytext=(freq[idx], vswr[idx] + 0.5),
-                ha='center', color=SWR_COLOR, fontsize=8,
-                arrowprops={'facecolor': 'red', 'shrink': .005})
+                xytext=(freq[idx], vswr[idx] - 0.3),
+                ha='center', color=SWR_COLOR, fontsize=8)
 
   if text:
     textstr = '\n'.join(text)
-    ax.text(0.05, 0.95, textstr, transform=ax.transAxes, zorder=20,
-            fontsize=10, color=SWR_COLOR, verticalalignment='top')
+    ax.text(0.05, 0.95, textstr, transform=ax.transAxes, zorder=20, family='monospace',
+            fontsize=8, linespacing=1.6, color=SWR_COLOR, verticalalignment='top')
 
 
 def rl_plot(dut: rf.Network, ax: Axes) -> None:
@@ -184,11 +183,27 @@ def rl_plot(dut: rf.Network, ax: Axes) -> None:
   ax.set_xlim(fmin, fmax)
   ax.set_ylim(top=0)
   ax.set_ylabel(r'$\Gamma$')
-  ax.axhline(y=-6, linewidth=1, zorder=9, color=SWR_COLOR, linestyle="-.")
-  ax.axhline(y=-10, linewidth=1, zorder=9, color=SWR_COLOR, linestyle="-.")
+  ax.axhline(y=-6, linewidth=.75, zorder=9, color=SWR_COLOR, linestyle="-.")
+  ax.axhline(y=-10, linewidth=.75, zorder=9, color=SWR_COLOR, linestyle="-.")
   for low, high, _ in BANDS:
     ax.axvspan(low*1000, high*1000, facecolor='cyan', alpha=0.15)
   ax.legend(loc='upper right')
+
+  freq = dut.frequency.f
+  rloss = dut.s_db[:, 0, 0]
+  peaks = signal.argrelextrema(rloss, lambda a, b: a < b, order=21)[0]
+
+  text = []
+  for idx in peaks:
+    text.append(f'{fmt_freq(freq[idx])} RL: {rloss[idx]:.2f}')
+    ax.annotate(f'{rloss[idx]:.2f}', xy=(freq[idx], rloss[idx]),
+                xytext=(freq[idx], rloss[idx] - .5),
+                ha='left', color=SWR_COLOR, fontsize=8)
+
+  if text:
+    textstr = '\n'.join(text)
+    ax.text(0.05, 0.95, textstr, transform=ax.transAxes, zorder=20, family='monospace',
+            fontsize=8, linespacing=1.6, color=SWR_COLOR, verticalalignment='top')
 
 
 def phase_plot(dut: rf.Network, ax: Axes) -> None:
@@ -275,7 +290,7 @@ def fmt_ohm(num: float, _: float | None = None) -> str:
 def fmt_freq(num: float, _: float | None = None) -> str:
   for unit in ("Hz", "KHz", "MHz", "GHz", "THz"):
     if abs(num) < 1000.0:
-      return f"{num:.1f}{unit}"
+      return f"{num:6.2f} {unit}"
     num /= 1000.0
   return f"{num:.1f}PHz"
 
