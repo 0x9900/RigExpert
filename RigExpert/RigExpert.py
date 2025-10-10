@@ -32,18 +32,21 @@ from scipy import signal  # type: ignore[import-untyped]
 __author__ = 'Fred W6BSD - https://github.com/0x9900/RigExpert/'
 
 DPI = 100
-LINE_COLOR = "yellow"
-SWR_COLOR = "cyan"
-LIGHTGRAY = "#ababab"
-DARKBLUE = "#1d1330"
-EDGECOLOR = "#4b4b4b"
+DARK_LIGHTGRAY = "#ababab"
+DARK_DARKBLUE = "#1d1330"
+DARK_EDGECOLOR = "#4b4b4b"
+DARK_TEXT = "#ffffff"
+LIGHT_LIGHTGRAY = "#ababab"
+LIGHT_DARKBLUE = "#fefefe"
+LIGHT_EDGECOLOR = "#8b8b8b"
+LIGHT_TEXT = "#000000"
 
-MY_PARAMS = {
-  'axes.edgecolor': EDGECOLOR,
-  'axes.facecolor': DARKBLUE,
+DEFAULT_PARAMS = {
+  'axes.edgecolor': DARK_EDGECOLOR,
+  'axes.facecolor': DARK_DARKBLUE,
   'axes.grid': True,
   'axes.grid.which': 'both',
-  'axes.labelcolor': LIGHTGRAY,
+  'axes.labelcolor': DARK_LIGHTGRAY,
   'axes.labelsize': 10,
   'axes.linewidth': 1.5,
   'axes.spines.bottom': True,
@@ -51,24 +54,24 @@ MY_PARAMS = {
   'axes.spines.right': False,
   'axes.spines.top': False,
   'figure.dpi': 100,
-  'figure.edgecolor': DARKBLUE,
-  'figure.facecolor': DARKBLUE,
+  'figure.edgecolor': DARK_DARKBLUE,
+  'figure.facecolor': DARK_DARKBLUE,
   'figure.figsize': (12, 5),
   'font.size': 10,
   'grid.alpha': 0.7,
-  'grid.color': LIGHTGRAY,
+  'grid.color': DARK_LIGHTGRAY,
   'grid.linestyle': 'dashed',
   'grid.linewidth': 0.25,
   'legend.fontsize': 8,
   'lines.linewidth': 1,
   'lines.markersize': 5,
-  'text.color': 'white',
-  'xtick.color': LIGHTGRAY,
-  'xtick.labelcolor': LIGHTGRAY,
+  'text.color': DARK_TEXT,
+  'xtick.color': DARK_LIGHTGRAY,
+  'xtick.labelcolor': DARK_LIGHTGRAY,
   'xtick.labelsize': 8,
   'xtick.minor.visible': False,
-  'ytick.color': LIGHTGRAY,
-  'ytick.labelcolor': LIGHTGRAY,
+  'ytick.color': DARK_LIGHTGRAY,
+  'ytick.labelcolor': DARK_LIGHTGRAY,
   'ytick.labelsize': 8,
   'ytick.minor.visible': False
 }
@@ -98,6 +101,40 @@ LOG_FORMAT = '%(asctime)s - %(lineno)d %(levelname)s - %(message)s'
 logging.basicConfig(format=LOG_FORMAT, datefmt='%x %X', level=logging.INFO)
 
 
+def set_dark_color() -> None:
+  params = {
+    'axes.edgecolor': DARK_EDGECOLOR,
+    'axes.facecolor': DARK_DARKBLUE,
+    'axes.labelcolor': DARK_LIGHTGRAY,
+    'figure.edgecolor': DARK_DARKBLUE,
+    'figure.facecolor': DARK_DARKBLUE,
+    'text.color': DARK_TEXT,
+    'grid.color': DARK_LIGHTGRAY,
+    'xtick.color': DARK_LIGHTGRAY,
+    'xtick.labelcolor': DARK_LIGHTGRAY,
+    'ytick.color': DARK_LIGHTGRAY,
+    'ytick.labelcolor': DARK_LIGHTGRAY,
+  }
+  plt.rcParams.update(params)
+
+
+def set_light_color() -> None:
+  params = {
+    'axes.edgecolor': LIGHT_EDGECOLOR,
+    'axes.facecolor': LIGHT_DARKBLUE,
+    'axes.labelcolor': LIGHT_LIGHTGRAY,
+    'figure.edgecolor': LIGHT_DARKBLUE,
+    'figure.facecolor': LIGHT_DARKBLUE,
+    'text.color': LIGHT_TEXT,
+    'grid.color': LIGHT_LIGHTGRAY,
+    'xtick.color': LIGHT_LIGHTGRAY,
+    'xtick.labelcolor': LIGHT_LIGHTGRAY,
+    'ytick.color': LIGHT_LIGHTGRAY,
+    'ytick.labelcolor': LIGHT_LIGHTGRAY,
+  }
+  plt.rcParams.update(params)
+
+
 def slugify(text: str) -> str:
   return re.sub(r'[\W_]+', '-', text.lower())
 
@@ -122,24 +159,27 @@ def read_s1p(filename: pathlib.Path, f_range: List[float] | None) -> rf.Network:
 
 
 def smith_chart(dut: rf.Network, ax: Axes) -> None:
+  edge_color = plt.rcParams.get('axes.edgecolor', '#b0b0b0')
   ax.set_aspect('equal', adjustable='box')  # Set aspect ratio to square
-  rf.plotting.smith(ax=ax, draw_vswr=[2, 3], draw_labels=True, ref_imm=50.0,
-                    chart_type='z')
-  dut.plot_s_smith(ax=ax, show_legend=True, color=LINE_COLOR,
-                   label="Complex Impedance", draw_labels=True)
+  dut.plot_s_smith(ax=ax, show_legend=True, draw_labels=True, linewidth=2,
+                   label="Complex Impedance")
+
   for circle in ax.findobj(match=plt.Circle):
-    if circle.get_edgecolor() != (0.0, 0.0, 0.0, 1.0):  # type: ignore
-      circle.set_edgecolor(LIGHTGRAY)                   # type: ignore
-      circle.set_linewidth(1)                           # type: ignore
-      circle.set_alpha(.25)
-      circle.set_linestyle('dotted')                    # type: ignore
-    else:
-      circle.set_linewidth(1.75)                        # type: ignore
-      circle.set_edgecolor(EDGECOLOR)                   # type: ignore
+    circle.set_linewidth(.75)                         # type: ignore
+    circle.set_edgecolor(edge_color)                  # type: ignore
+    circle.set_linestyle('dotted')                    # type: ignore
+
+  for vswr in (2, 3):
+    gamma = (vswr - 1) / (vswr + 1)
+    circle = plt.Circle((0, 0), gamma, color=edge_color, fill=False,
+                        linewidth=.75, linestyle='--')
+    ax.add_artist(circle)
+    ax.text(-0.1, gamma + 0.01, f'VSWR={vswr}', color=edge_color,
+            fontsize=9, ha='left', va='bottom')
 
 
 def vswr_plot(dut: rf.Network, ax: Axes) -> None:
-  dut.plot_s_vswr(ax=ax, color=LINE_COLOR, label='VSWR')
+  dut.plot_s_vswr(ax=ax, label='VSWR')
 
   fmin = dut.frequency.f.min()
   fmax = dut.frequency.f.max()
@@ -148,11 +188,11 @@ def vswr_plot(dut: rf.Network, ax: Axes) -> None:
 
   max_vswr = (1+dut.s_mag.max())/(1-dut.s_mag.max())
   ax.set_ylim(1, 3 if max_vswr < 3 else max_vswr * 1.2 if max_vswr < 15 else 15)
-  ax.axhline(y=2, linewidth=.75, zorder=9, color=SWR_COLOR, linestyle="-.")
-  ax.axhline(y=3, linewidth=.75, zorder=9, color=SWR_COLOR, linestyle="-.")
+  ax.axhline(y=2, linewidth=.75, zorder=9, linestyle="-.")
+  ax.axhline(y=3, linewidth=.75, zorder=9, linestyle="-.")
 
   for low, high, _l in BANDS:
-    ax.axvspan(low*1000, high*1000, facecolor='cyan', alpha=0.15)
+    ax.axvspan(low*1000, high*1000, alpha=0.15)
     ax.legend(loc='upper right')
 
   freq = dut.frequency.f
@@ -166,16 +206,16 @@ def vswr_plot(dut: rf.Network, ax: Axes) -> None:
     text.append(f'{fmt_freq(freq[idx])} VSWR: {vswr[idx]:.2f}')
     ax.annotate(f'{vswr[idx]:.2f}', xy=(freq[idx], vswr[idx]),
                 xytext=(freq[idx], vswr[idx] - 0.3),
-                ha='center', color=SWR_COLOR, fontsize=8)
+                ha='center', fontsize=8)
 
   if text:
     textstr = '\n'.join(text)
     ax.text(0.05, 0.95, textstr, transform=ax.transAxes, zorder=20, family='monospace',
-            fontsize=8, linespacing=1.6, color=SWR_COLOR, verticalalignment='top')
+            fontsize=8, linespacing=1.6, verticalalignment='top')
 
 
 def rl_plot(dut: rf.Network, ax: Axes) -> None:
-  dut.plot_s_db(ax=ax, color=LINE_COLOR, label="Return Loss")
+  dut.plot_s_db(ax=ax, label="Return Loss")
 
   fmin = dut.frequency.f.min()
   fmax = dut.frequency.f.max()
@@ -183,10 +223,10 @@ def rl_plot(dut: rf.Network, ax: Axes) -> None:
   ax.set_xlim(fmin, fmax)
   ax.set_ylim(top=0)
   ax.set_ylabel(r'$\Gamma$')
-  ax.axhline(y=-6, linewidth=.75, zorder=9, color=SWR_COLOR, linestyle="-.")
-  ax.axhline(y=-10, linewidth=.75, zorder=9, color=SWR_COLOR, linestyle="-.")
+  ax.axhline(y=-6, linewidth=.75, zorder=9, linestyle="-.")
+  ax.axhline(y=-10, linewidth=.75, zorder=9, linestyle="-.")
   for low, high, _ in BANDS:
-    ax.axvspan(low*1000, high*1000, facecolor='cyan', alpha=0.15)
+    ax.axvspan(low*1000, high*1000, alpha=0.15)
   ax.legend(loc='upper right')
 
   freq = dut.frequency.f
@@ -198,24 +238,24 @@ def rl_plot(dut: rf.Network, ax: Axes) -> None:
     text.append(f'{fmt_freq(freq[idx])} RL: {rloss[idx]:.2f}')
     ax.annotate(f'{rloss[idx]:.2f}', xy=(freq[idx], rloss[idx]),
                 xytext=(freq[idx], rloss[idx] - .5),
-                ha='left', color=SWR_COLOR, fontsize=8)
+                ha='left', fontsize=8)
 
   if text:
     textstr = '\n'.join(text)
     ax.text(0.05, 0.95, textstr, transform=ax.transAxes, zorder=20, family='monospace',
-            fontsize=8, linespacing=1.6, color=SWR_COLOR, verticalalignment='top')
+            fontsize=8, linespacing=1.6, verticalalignment='top')
 
 
 def phase_plot(dut: rf.Network, ax: Axes) -> None:
   fmin = dut.frequency.f.min()
   fmax = dut.frequency.f.max()
 
-  dut.plot_s_deg(ax=ax, color=LINE_COLOR, label="Phase")
+  dut.plot_s_deg(ax=ax, label="Phase")
   ax.set_xlim(fmin, fmax)
   ax.set_ylim(bottom=-180, top=180)
   ax.set_ylabel(r'$\phi$')
   for low, high, _ in BANDS:
-    ax.axvspan(low*1000, high*1000, facecolor='lightgray', alpha=0.15)
+    ax.axvspan(low*1000, high*1000, alpha=0.15)
   ax.legend(loc='upper right')
 
 
@@ -223,12 +263,12 @@ def impedance_plot(dut: rf.Network, ax: Axes) -> None:
   fmin = dut.frequency.f.min()
   fmax = dut.frequency.f.max()
 
-  dut.plot_z_re(ax=ax, color=LINE_COLOR, label="| Z |")
+  dut.plot_z_re(ax=ax, label="| Z |")
   ax.set_xlim(fmin, fmax)
   ax.set_ylabel(r'$\Omega$')
   ax.yaxis.set_major_formatter(plt.FuncFormatter(fmt_ohm))
   for low, high, _ in BANDS:
-    ax.axvspan(low*1000, high*1000, facecolor='lightgray', alpha=0.15)
+    ax.axvspan(low*1000, high*1000, alpha=0.15)
   ax.legend(loc='upper center')
 
 
@@ -240,7 +280,7 @@ def dual_plot(dut: rf.Network, opts: argparse.Namespace) -> None:
   smith_chart(dut.s11, fig.add_subplot(grid[0, 0]))
   vswr_plot(dut.s11, fig.add_subplot(grid[1, 0]))
 
-  fig.text(0.01, 0.01, __author__, color=LIGHTGRAY, fontsize=8)
+  fig.text(0.01, 0.01, __author__, fontsize=8)
   img_name = opts.target.joinpath(f'{slugify(opts.title)}-dual{opts.ext}')
   logging.info(img_name)
   fig.savefig(img_name, transparent=False)
@@ -257,7 +297,7 @@ def draw_all(dut: rf.Network, opts: argparse.Namespace) -> None:
   rl_plot(dut.s11, fig.add_subplot(grid[1, 1]))
   phase_plot(dut.s11, fig.add_subplot(grid[1, 2]))
 
-  fig.text(0.01, 0.01, __author__, color=LIGHTGRAY, fontsize=8)
+  fig.text(0.01, 0.01, __author__, fontsize=8)
   img_name = opts.target.joinpath(f'{slugify(opts.title)}-all{opts.ext}')
   logging.info(img_name)
   fig.savefig(img_name, transparent=False)
@@ -272,7 +312,7 @@ def draw(dut: rf.Network, call: Callable, opts: argparse.Namespace) -> None:
   fig.suptitle(opts.title)
   call(dut.s11, fig.gca())
 
-  fig.text(0.01, 0.01, __author__, color=LIGHTGRAY, fontsize=8)
+  fig.text(0.01, 0.01, __author__, fontsize=8)
   img_name = opts.target.joinpath(f'{slugify(opts.title)}-{call.__name__}{opts.ext}')
   logging.info(img_name)
   fig.savefig(img_name, transparent=False)
@@ -318,6 +358,9 @@ def parse_args() -> argparse.Namespace:
                       help=('Target directory where the images will be stored '
                             '(default: %(default)s)'))
   parser.add_argument('-r', '--range', type=type_range, help='Frequency range start:stop in MHz')
+  parser.add_argument('-C', '--color', choices=['dark', 'light'], default='dark',
+                      help='Dark or light background. For printing it is best to use light')
+
   d_group = parser.add_argument_group()
   for short, long in options:
     d_group.add_argument(f'-{short}', f'--{long}', action="store_true", default=False)
@@ -337,10 +380,18 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
   functions = []
-  plt.rcParams.update(MY_PARAMS)
+  plt.rcParams.update(DEFAULT_PARAMS)
   plt.tight_layout()
 
   opts = parse_args()
+
+  match opts.color:
+    case 'light':
+      set_light_color()
+    case 'dark':
+      set_dark_color()
+    case _:
+      raise argparse.ArgumentError('Color error')
 
   try:
     dut = read_s1p(opts.s1p_file, opts.range)
