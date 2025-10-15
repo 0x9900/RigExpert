@@ -379,7 +379,6 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
-  functions = []
   plt.rcParams.update(DEFAULT_PARAMS)
   plt.tight_layout()
 
@@ -391,7 +390,7 @@ def main() -> None:
     case 'dark':
       set_dark_color()
     case _:
-      raise argparse.ArgumentError('Color error')
+      raise argparse.ArgumentError
 
   try:
     dut = read_s1p(opts.s1p_file, opts.range)
@@ -412,19 +411,17 @@ def main() -> None:
   if opts.dual:
     dual_plot(dut, opts)
 
-  if opts.vswr:
-    functions.append(vswr_plot)
-  if opts.phase:
-    functions.append(phase_plot)
-  if opts.rloss:
-    functions.append(rl_plot)
-  if opts.smith:
-    functions.append(smith_chart)
-  if opts.impedance:
-    functions.append(impedance_plot)
+  option_map = {
+    "vswr": vswr_plot,
+    "phase": phase_plot,
+    "rloss": rl_plot,
+    "smith": smith_chart,
+    "impedance": impedance_plot,
+  }
 
-  for function in functions:
-    draw(dut, function, opts)
+  for name, func in option_map.items():
+    if getattr(opts, name):
+      draw(dut, func, opts)
 
 
 if __name__ == "__main__":
